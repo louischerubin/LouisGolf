@@ -112,10 +112,22 @@
   .video .vt{font-family:var(--sora);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
 
   /* live prototype embed */
-  .demo{display:flex;flex-direction:column;align-items:center;margin-top:40px}
-  .demo-frame{width:100%;max-width:380px;border:0;border-radius:24px;height:760px;background:transparent;box-shadow:0 40px 90px -30px rgba(0,0,0,.7)}
+  .demo{display:flex;flex-direction:column;align-items:center;margin-top:40px;position:relative;padding:20px 0}
+  .demo:before{content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);width:min(460px,90%);height:100%;border-radius:32px;background:radial-gradient(60% 50% at 50% 35%,rgba(182,255,77,.14),transparent 70%),radial-gradient(70% 60% at 50% 60%,rgba(84,214,192,.10),transparent 70%);pointer-events:none}
+  .demo-frame{position:relative;width:100%;max-width:360px;aspect-ratio:346/720;border:0;border-radius:24px;background:transparent;overflow:hidden;filter:drop-shadow(0 24px 50px rgba(0,0,0,.6)) drop-shadow(0 0 26px rgba(182,255,77,.2))}
   .demo-note{font-family:var(--sora);font-size:12px;color:var(--dim);margin-top:16px;text-align:center;max-width:440px;line-height:1.6}
   .demo-note b{color:var(--mist);font-weight:600}
+
+  /* app icon home-screen band */
+  .appicon{display:flex;flex-direction:column;align-items:center;gap:12px;padding:14px 0 4px}
+  .appicon .tile{width:96px;height:96px;border-radius:22px;box-shadow:0 18px 40px -12px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.06)}
+  .appicon .name{font-family:var(--sora);font-weight:600;font-size:14px;color:var(--mist);letter-spacing:-.01em}
+  .appicon .coming{font-family:var(--sora);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+  .stores{display:flex;gap:10px;margin-top:2px}
+  .store-badge{display:flex;align-items:center;gap:7px;border:1px solid var(--line2);background:var(--panel);border-radius:11px;padding:8px 13px;font-family:var(--sora);color:var(--mist)}
+  .store-badge .s1{font-size:8px;color:var(--dim);letter-spacing:.04em;line-height:1}
+  .store-badge .s2{font-size:12px;font-weight:600;line-height:1.1}
+  .store-badge svg{width:16px;height:16px;flex-shrink:0}
 
   /* perks */
   .perks{max-width:560px;margin:32px auto 0;display:flex;flex-direction:column;gap:12px}
@@ -162,6 +174,29 @@
   </form>
   <div class="thanks" id="thanks1"><div class="t">You're on the list.</div><div class="d">Welcome aboard. Founding members hear first — and lock in founder pricing at launch.</div></div>
   <div class="micro" id="micro1">In development · No payment now · Founder pricing &amp; first access at launch</div>
+
+  <div class="appicon">
+    <svg class="tile" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LouisGolf app icon">
+      <defs>
+        <linearGradient id="ai-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#114433"/><stop offset="0.55" stop-color="#0B2018"/><stop offset="1" stop-color="#06100D"/></linearGradient>
+        <radialGradient id="ai-glow" cx="50%" cy="36%" r="55%"><stop offset="0" stop-color="#B6FF4D" stop-opacity="0.18"/><stop offset="1" stop-color="#B6FF4D" stop-opacity="0"/></radialGradient>
+      </defs>
+      <rect width="100" height="100" rx="22" fill="url(#ai-bg)"/>
+      <rect width="100" height="100" rx="22" fill="url(#ai-glow)"/>
+      <g transform="translate(28,26) scale(0.46)">
+        <path d="M26 78 Q50 70 78 78" stroke="#B6FF4D" stroke-width="9" stroke-linecap="round" fill="none"/>
+        <line x1="34" y1="78" x2="34" y2="22" stroke="#B6FF4D" stroke-width="9" stroke-linecap="round"/>
+        <path d="M38 22 L66 30 L38 39 Z" fill="#F2B441"/>
+        <ellipse cx="34" cy="78" rx="4.4" ry="2" fill="#0B2018"/>
+      </g>
+    </svg>
+    <div class="name">LouisGolf</div>
+    <div class="coming">Coming to iPhone &amp; Android</div>
+    <div class="stores">
+      <div class="store-badge"><svg viewBox="0 0 24 24" fill="#EAF4EE"><path d="M16.4 12.9c0-2 1.6-2.9 1.7-3-.9-1.4-2.4-1.6-2.9-1.6-1.2-.1-2.4.7-3 .7-.6 0-1.6-.7-2.6-.7-1.3 0-2.5.8-3.2 2-.1.3-1.4 2.5-.4 5.4.5 1.4 1.3 3 2.4 3 .9 0 1.3-.6 2.5-.6s1.5.6 2.6.6c1.1 0 1.8-1.4 2.3-2.8-.6-.3-1.6-1-1.7-2.4zM14.6 6.6c.5-.7.9-1.6.8-2.6-.8 0-1.8.5-2.4 1.2-.5.6-1 1.5-.8 2.4.9.1 1.8-.4 2.4-1z"/></svg><div><div class="s1">Coming to the</div><div class="s2">App Store</div></div></div>
+      <div class="store-badge"><svg viewBox="0 0 24 24" fill="#EAF4EE"><path d="M3.6 2.3c-.2.2-.3.5-.3.9v17.6c0 .4.1.7.3.9l.1.1L13.5 12v-.2L3.7 2.2l-.1.1zM17 15.3l-3.3-3.3L17 8.7l3.9 2.2c1.1.6 1.1 1.6 0 2.2L17 15.3zM14.3 12l3.3 3.3-11 6.3c-.4.2-.7.2-1 0l8.7-9.6zM5.6 2.4c.3-.2.6-.2 1 0l11 6.3-3.3 3.3-8.7-9.6z"/></svg><div><div class="s1">Coming to</div><div class="s2">Google Play</div></div></div>
+    </div>
+  </div>
 </div></header>
 
 <section><div class="wrap">
@@ -205,7 +240,7 @@
   <h2>Talk to <em>Louis.</em></h2>
   <p class="lead">A live preview of the caddy. Turn your sound on, tap the map to place your ball, then hold the orb and ask for the play.</p>
   <div class="demo">
-    <iframe class="demo-frame" src="prototype.html" title="LouisGolf interactive prototype" loading="lazy" allow="microphone"></iframe>
+    <iframe class="demo-frame" src="prototype.html" title="LouisGolf interactive prototype" loading="lazy" allow="microphone" scrolling="no"></iframe>
     <div class="demo-note">This is an early interactive preview — <b>not the finished app.</b> Best experienced with sound on, in Chrome or Safari.</div>
   </div>
 </div></section>
