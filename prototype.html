@@ -552,14 +552,13 @@
 
   document.body.addEventListener('click',()=>{if('speechSynthesis'in window&&!louisVoice)louisVoice=pickVoice();},{once:true});
 
-  /* --- Embed mode: when shown in an iframe (landing page), show only the phone, scaled to fit, no scroll --- */
+  /* --- Phone-only by default (clean app view). Add ?full to the URL for the full demo page with intro + tabs. --- */
   (function(){
-    var embedded = (window.self !== window.top) || /[?&]embed/.test(location.search);
-    if(!embedded) return;
-    document.body.classList.add('embed');
+    var full = /[?&]full/.test(location.search);
+    if(full) return;                       // full demo page (intro, tabs, legend)
+    document.body.classList.add('embed');  // default + when embedded: just the phone, fit to screen
     var phone = document.querySelector('.phone');
     function fit(){
-      // phone base size (accounts for the narrow-screen breakpoint)
       var pw = window.innerWidth <= 420 ? 316 : 346;
       var ph = window.innerWidth <= 420 ? 660 : 720;
       var s = Math.min((window.innerWidth-8)/pw, (window.innerHeight-8)/ph, 1);
