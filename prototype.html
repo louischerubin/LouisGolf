@@ -224,6 +224,11 @@
   .legend{max-width:520px;text-align:center;color:var(--dim);font-size:12px;line-height:1.6}
   .legend b{color:var(--mist)}
   @media(max-width:420px){.phone{width:316px;height:660px}.read-chip .big{font-size:46px}}
+
+  /* embed mode: when shown in an iframe on the landing page — just the phone, fit to frame, no scroll */
+  body.embed{padding:0;margin:0;min-height:0;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:0;background:transparent}
+  body.embed .intro,body.embed .jumper,body.embed .legend{display:none!important}
+  body.embed .phone{flex-shrink:0;transform-origin:center center}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -546,6 +551,24 @@
   document.getElementById('reviewSpeak').addEventListener('click',()=>speak("Eighty-one — so close to seventy-nine, and no doubles all day. You stuck to the plan on eleven and seventeen, and that's exactly how the big numbers disappeared. The strokes left are on the greens. Three three-putts. That's where we go to work. Good round, Louis.",null,null));
 
   document.body.addEventListener('click',()=>{if('speechSynthesis'in window&&!louisVoice)louisVoice=pickVoice();},{once:true});
+
+  /* --- Embed mode: when shown in an iframe (landing page), show only the phone, scaled to fit, no scroll --- */
+  (function(){
+    var embedded = (window.self !== window.top) || /[?&]embed/.test(location.search);
+    if(!embedded) return;
+    document.body.classList.add('embed');
+    var phone = document.querySelector('.phone');
+    function fit(){
+      // phone base size (accounts for the narrow-screen breakpoint)
+      var pw = window.innerWidth <= 420 ? 316 : 346;
+      var ph = window.innerWidth <= 420 ? 660 : 720;
+      var s = Math.min((window.innerWidth-8)/pw, (window.innerHeight-8)/ph, 1);
+      phone.style.transform = 'scale(' + s + ')';
+    }
+    fit();
+    window.addEventListener('resize', fit);
+    setTimeout(fit, 200);
+  })();
 </script>
 </body>
 </html>
