@@ -61,6 +61,8 @@
 
   /* form */
   .signup{display:flex;flex-direction:column;gap:10px;max-width:420px;margin:0 auto}
+  .signup .name-row{display:flex;gap:10px}
+  .signup .name-row input{flex:1;min-width:0}
   .signup input{width:100%;height:52px;border-radius:14px;border:1px solid var(--line2);background:var(--panel);color:var(--mist);font-family:var(--body);font-size:15px;padding:0 18px;backdrop-filter:blur(10px)}
   .signup input::placeholder{color:var(--dim)}
   .signup input:focus{outline:none;border-color:var(--lime)}
@@ -169,7 +171,10 @@
   <h1>Stop giving<br>away <em>shots.</em></h1>
   <p class="sub">LouisGolf is a voice caddy for the golfer trying to break 80 — <b>strategy and calm in your ear, on every hole.</b> Join the founding list and lock in founder pricing.</p>
   <form class="signup" id="form1" action="https://formspree.io/f/xykqnqgj" method="POST">
-    <input type="text" name="name" placeholder="Your name" required aria-label="Name" autocomplete="name">
+    <div class="name-row">
+      <input type="text" name="first_name" placeholder="First name" required aria-label="First name" autocomplete="given-name">
+      <input type="text" name="last_name" placeholder="Last name" required aria-label="Last name" autocomplete="family-name">
+    </div>
     <input type="email" name="email" placeholder="your@email.com" required aria-label="Email" autocomplete="email">
     <input type="tel" name="phone" placeholder="Mobile number" required aria-label="Mobile phone" autocomplete="tel">
     <button type="submit">Join the founding list</button>
@@ -275,7 +280,10 @@
     <h2>Your caddy is <em>coming.</em></h2>
     <p class="lead" style="margin-bottom:26px">Join the founding list and stop giving away shots.</p>
     <form class="signup" id="form2" action="https://formspree.io/f/xykqnqgj" method="POST">
-      <input type="text" name="name" placeholder="Your name" required aria-label="Name" autocomplete="name">
+      <div class="name-row">
+      <input type="text" name="first_name" placeholder="First name" required aria-label="First name" autocomplete="given-name">
+      <input type="text" name="last_name" placeholder="Last name" required aria-label="Last name" autocomplete="family-name">
+    </div>
       <input type="email" name="email" placeholder="your@email.com" required aria-label="Email" autocomplete="email">
       <input type="tel" name="phone" placeholder="Mobile number" required aria-label="Mobile phone" autocomplete="tel">
       <button type="submit">Join the founding list</button>
