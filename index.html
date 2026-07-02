@@ -60,11 +60,11 @@
   .sub b{color:var(--mist);font-weight:600}
 
   /* form */
-  .signup{display:flex;gap:10px;max-width:460px;margin:0 auto;flex-wrap:wrap;justify-content:center}
-  .signup input{flex:1;min-width:210px;height:56px;border-radius:15px;border:1px solid var(--line2);background:var(--panel);color:var(--mist);font-family:var(--body);font-size:15px;padding:0 18px;backdrop-filter:blur(10px)}
+  .signup{display:flex;flex-direction:column;gap:10px;max-width:420px;margin:0 auto}
+  .signup input{width:100%;height:52px;border-radius:14px;border:1px solid var(--line2);background:var(--panel);color:var(--mist);font-family:var(--body);font-size:15px;padding:0 18px;backdrop-filter:blur(10px)}
   .signup input::placeholder{color:var(--dim)}
   .signup input:focus{outline:none;border-color:var(--lime)}
-  .signup button{height:56px;padding:0 24px;border:none;border-radius:15px;background:var(--lime);color:#0a1a10;font-family:var(--sora);font-weight:700;font-size:14px;letter-spacing:.02em;cursor:pointer;box-shadow:0 14px 32px -10px rgba(182,255,77,.55);transition:transform .12s ease;white-space:nowrap}
+  .signup button{width:100%;height:54px;margin-top:2px;padding:0 24px;border:none;border-radius:14px;background:var(--lime);color:#0a1a10;font-family:var(--sora);font-weight:700;font-size:14px;letter-spacing:.02em;cursor:pointer;box-shadow:0 14px 32px -10px rgba(182,255,77,.55);transition:transform .12s ease}
   .signup button:active{transform:scale(.97)}
   .micro{font-family:var(--sora);font-size:12px;color:var(--dim);margin-top:14px;letter-spacing:.01em}
   .thanks{display:none;max-width:460px;margin:0 auto;background:rgba(182,255,77,.08);border:1px solid var(--line);border-radius:16px;padding:20px}
@@ -168,12 +168,14 @@
   <div class="eyebrow">Founding members — now open</div>
   <h1>Stop giving<br>away <em>shots.</em></h1>
   <p class="sub">LouisGolf is a voice caddy for the golfer trying to break 80 — <b>strategy and calm in your ear, on every hole.</b> Join the founding list and lock in founder pricing.</p>
-  <form class="signup" id="form1" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
-    <input type="email" name="email" placeholder="your@email.com" required aria-label="Email">
+  <form class="signup" id="form1" action="https://formspree.io/f/xykqnqgj" method="POST">
+    <input type="text" name="name" placeholder="Your name" required aria-label="Name" autocomplete="name">
+    <input type="email" name="email" placeholder="your@email.com" required aria-label="Email" autocomplete="email">
+    <input type="tel" name="phone" placeholder="Mobile number" required aria-label="Mobile phone" autocomplete="tel">
     <button type="submit">Join the founding list</button>
   </form>
   <div class="thanks" id="thanks1"><div class="t">You're on the list.</div><div class="d">Welcome aboard. Founding members hear first — and lock in founder pricing at launch.</div></div>
-  <div class="micro" id="micro1">In development · No payment now · Founder pricing &amp; first access at launch</div>
+  <div class="micro" id="micro1">No payment now · We'll only reach out about founding access · No spam, ever</div>
 
   <div class="appicon">
     <svg class="tile" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="LouisGolf app icon">
@@ -272,12 +274,14 @@
     <div class="orb-stage"><div class="rings"></div><div class="orb">L</div></div>
     <h2>Your caddy is <em>coming.</em></h2>
     <p class="lead" style="margin-bottom:26px">Join the founding list and stop giving away shots.</p>
-    <form class="signup" id="form2" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
-      <input type="email" name="email" placeholder="your@email.com" required aria-label="Email">
+    <form class="signup" id="form2" action="https://formspree.io/f/xykqnqgj" method="POST">
+      <input type="text" name="name" placeholder="Your name" required aria-label="Name" autocomplete="name">
+      <input type="email" name="email" placeholder="your@email.com" required aria-label="Email" autocomplete="email">
+      <input type="tel" name="phone" placeholder="Mobile number" required aria-label="Mobile phone" autocomplete="tel">
       <button type="submit">Join the founding list</button>
     </form>
     <div class="thanks" id="thanks2"><div class="t">You're on the list.</div><div class="d">Welcome aboard — founding members hear first.</div></div>
-    <div class="micro" id="micro2">In development · No payment now · Founder pricing &amp; first access at launch</div>
+    <div class="micro" id="micro2">No payment now · We'll only reach out about founding access · No spam, ever</div>
   </div>
 </div></section>
 
@@ -292,7 +296,7 @@
     const f=document.getElementById(formId),t=document.getElementById(thanksId),m=document.getElementById(microId);
     f.addEventListener('submit',async(e)=>{
       e.preventDefault();
-      const email=f.querySelector('input').value;
+      const email=(f.querySelector('input[name=email]')||f.querySelector('input')).value;
       const demo=f.action.includes('YOUR_FORM_ID');
       try{
         if(!demo){await fetch(f.action,{method:'POST',body:new FormData(f),headers:{'Accept':'application/json'}});}
