@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LouisGolf — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@1,9..144,400;1,9..144,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#06100D; --deep:#0B1A16; --jade:#0E3328; --panel:rgba(255,255,255,.055);
+    --line:rgba(190,255,170,.13); --line2:rgba(255,255,255,.09);
+    --lime:#B6FF4D; --lime-soft:#9CE85C; --teal:#54D6C0; --gold:#F2B441; --pin:#FF5A47;
+    --mist:#EAF4EE; --dim:#8AA095;
+    --sora:'Sora',sans-serif; --body:'Manrope',sans-serif; --serif:'Fraunces',serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:var(--body);color:var(--mist);min-height:100vh;
+    background:
+      radial-gradient(80% 50% at 50% -8%, rgba(182,255,77,.10), transparent 60%),
+      radial-gradient(70% 60% at 85% 110%, rgba(84,214,192,.12), transparent 55%),
+      radial-gradient(120% 90% at 15% 100%, rgba(14,51,40,.6), transparent 60%),
+      linear-gradient(160deg,#08130F,#06100D 70%);
+    display:flex;flex-direction:column;align-items:center;padding:34px 16px 60px;gap:22px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .intro{max-width:540px;text-align:center}
+  .eyebrow{font-family:var(--sora);font-weight:600;letter-spacing:.34em;text-transform:uppercase;font-size:10.5px;color:var(--lime);margin-bottom:12px}
+  .intro h1{font-family:var(--sora);font-weight:700;font-size:clamp(26px,5.5vw,38px);letter-spacing:-.025em;line-height:1.05;margin-bottom:10px}
+  .intro h1 em{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--lime)}
+  .intro p{color:var(--dim);font-size:13.5px;line-height:1.6}
+  .sound-toggle{display:inline-flex;align-items:center;gap:9px;cursor:pointer;background:var(--panel);border:1px solid var(--line);padding:9px 16px;border-radius:30px;font-family:var(--sora);font-size:12px;font-weight:600;letter-spacing:.03em;color:var(--mist);-webkit-tap-highlight-color:transparent;backdrop-filter:blur(10px)}
+  .sound-toggle.off{opacity:.5}
+  .ctrl-row{display:flex;gap:10px;align-items:center;justify-content:center;margin-top:14px;flex-wrap:wrap}
+  .voice-pick{font-family:var(--sora);font-size:12px;font-weight:600;color:var(--mist);background:var(--panel);border:1px solid var(--line);border-radius:30px;padding:9px 14px;max-width:230px;backdrop-filter:blur(10px);-webkit-tap-highlight-color:transparent;cursor:pointer}
+  .voice-pick option{background:#0c1c17;color:var(--mist)}
+  .voice-note{color:var(--dim);font-size:11.5px;line-height:1.5;margin-top:10px;max-width:440px;margin-inline:auto}
+
+  .jumper{display:flex;gap:5px;background:rgba(0,0,0,.3);padding:6px;border-radius:16px;flex-wrap:wrap;justify-content:center;max-width:360px;border:1px solid var(--line2);backdrop-filter:blur(10px)}
+  .jumper button{border:none;background:transparent;color:var(--dim);font-family:var(--sora);font-weight:600;font-size:11px;letter-spacing:.02em;padding:8px 13px;border-radius:11px;cursor:pointer;transition:.18s;-webkit-tap-highlight-color:transparent}
+  .jumper button.active{background:var(--lime);color:#0a1a10}
+
+  .phone{
+    width:346px;height:720px;border-radius:48px;padding:11px;flex-shrink:0;position:relative;
+    background:linear-gradient(160deg,#16241F,#080f0c);
+    box-shadow:0 1px 0 rgba(255,255,255,.06) inset,0 50px 90px -30px rgba(0,0,0,.8),0 0 0 1px rgba(0,0,0,.5),0 0 60px -20px rgba(182,255,77,.15);
+  }
+  .screen{position:relative;width:100%;height:100%;border-radius:38px;overflow:hidden;display:flex;flex-direction:column;
+    background:radial-gradient(90% 45% at 50% 0%, rgba(182,255,77,.07), transparent 55%),radial-gradient(80% 50% at 50% 100%, rgba(84,214,192,.08), transparent 55%),linear-gradient(165deg,#0c1c17,#070f0c)}
+  .notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:116px;height:25px;background:#070f0c;border-radius:0 0 16px 16px;z-index:40}
+
+  .statusbar{display:flex;justify-content:space-between;align-items:center;padding:15px 22px 0;font-family:var(--sora);font-size:11px;letter-spacing:.03em;color:var(--dim);z-index:10}
+  .statusbar .brand{display:inline-flex;align-items:center;gap:7px;color:var(--mist);font-weight:600}
+  .chip-on{display:inline-flex;align-items:center;gap:5px;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--lime-soft)}
+  .chip-on:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 8px var(--lime)}
+
+  .scene{display:none;flex-direction:column;flex:1;min-height:0}
+  .scene.active{display:flex}
+
+  /* ---- the Louis orb (signature) ---- */
+  .orb-stage{position:relative;display:flex;align-items:center;justify-content:center}
+  .rings{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .rings:before,.rings:after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(182,255,77,.14)}
+  .rings:before{width:150%;height:150%}
+  .rings:after{width:210%;height:210%;border-color:rgba(182,255,77,.07)}
+  .orb{
+    position:relative;border-radius:50%;cursor:pointer;-webkit-tap-highlight-color:transparent;
+    background:
+      radial-gradient(circle at 36% 30%, #E8FFB0 0%, var(--lime) 26%, #4FB05A 60%, #14463A 100%);
+    box-shadow:0 0 0 1px rgba(255,255,255,.25) inset,0 14px 40px -8px rgba(182,255,77,.55),0 0 70px -10px rgba(182,255,77,.45);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-style:italic;font-weight:500;color:#0c2417;
+    transition:transform .18s ease;animation:breathe 4s ease-in-out infinite;
+  }
+  .orb:active{transform:scale(.95)}
+  .orb.talking{animation:talk 1.1s ease-in-out infinite}
+  @keyframes breathe{0%,100%{box-shadow:0 0 0 1px rgba(255,255,255,.25) inset,0 14px 40px -8px rgba(182,255,77,.5),0 0 60px -12px rgba(182,255,77,.4)}50%{box-shadow:0 0 0 1px rgba(255,255,255,.3) inset,0 16px 50px -6px rgba(182,255,77,.65),0 0 90px -8px rgba(182,255,77,.6)}}
+  @keyframes talk{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
+  .wave{display:flex;align-items:center;gap:3.5px;height:24px}
+  .wave span{width:3.5px;height:7px;background:#0c2417;border-radius:3px;opacity:.55}
+  .wave.on span{animation:wv .75s ease-in-out infinite}
+  .wave.on span:nth-child(2){animation-delay:.09s}.wave.on span:nth-child(3){animation-delay:.18s}.wave.on span:nth-child(4){animation-delay:.27s}.wave.on span:nth-child(5){animation-delay:.13s}
+  @keyframes wv{0%,100%{height:6px;opacity:.5}50%{height:22px;opacity:1}}
+
+  /* ---- START ---- */
+  .start{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 28px;text-align:center}
+  .start .orb-stage{margin-bottom:30px}
+  .start .orb{width:128px;height:128px;font-size:46px}
+  .start h2{font-family:var(--sora);font-weight:800;font-size:32px;letter-spacing:-.03em}
+  .start .sub{font-family:var(--sora);font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--lime);margin-top:6px;margin-bottom:24px}
+  .glass{background:var(--panel);border:1px solid var(--line2);border-radius:20px;backdrop-filter:blur(14px)}
+  .course-card{width:100%;padding:16px 18px;text-align:left;margin-bottom:18px}
+  .course-card .cn{font-family:var(--sora);font-weight:700;font-size:18px;letter-spacing:-.01em}
+  .course-card .cd{font-family:var(--body);font-size:12px;color:var(--dim);margin-top:3px}
+  .course-card .ready{display:inline-flex;align-items:center;gap:6px;margin-top:11px;font-family:var(--sora);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--lime-soft);font-weight:600}
+  .course-card .ready:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 8px var(--lime)}
+
+  .btn{width:100%;height:58px;border:none;border-radius:18px;cursor:pointer;font-family:var(--sora);font-weight:700;font-size:13.5px;letter-spacing:.02em;display:flex;align-items:center;justify-content:center;gap:10px;-webkit-tap-highlight-color:transparent;transition:transform .12s ease}
+  .btn:active{transform:scale(.97)}
+  .btn.lime{background:var(--lime);color:#0a1a10;box-shadow:0 14px 34px -10px rgba(182,255,77,.55)}
+  .btn.glassbtn{background:var(--panel);border:1px solid var(--line2);color:var(--mist);height:50px;font-size:12px;backdrop-filter:blur(10px)}
+
+  .holebar{display:flex;justify-content:space-between;align-items:center;padding:16px 22px 0}
+  .holebar .hole{font-family:var(--sora);font-weight:700;font-size:13px;letter-spacing:.04em}
+  .holebar .hole b{color:var(--lime)}
+  .pace{font-family:var(--sora);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);display:flex;align-items:center;gap:6px}
+  .pace:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--lime);box-shadow:0 0 7px var(--lime)}
+
+  /* ---- HOLE / dark map ---- */
+  .mapwrap{flex:1;min-height:0;position:relative;margin:12px 0 0;overflow:hidden}
+  .mapwrap svg{position:absolute;inset:0;width:100%;height:100%}
+  .read-chip{position:absolute;top:16px;right:16px;z-index:3;text-align:right;padding:12px 15px;border-radius:18px;background:rgba(7,16,12,.5);border:1px solid var(--line);backdrop-filter:blur(12px)}
+  .read-chip .big{font-family:var(--sora);font-weight:700;font-size:54px;line-height:.85;letter-spacing:-.04em;color:var(--lime);text-shadow:0 0 24px rgba(182,255,77,.4)}
+  .read-chip .unit{font-family:var(--sora);font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim);margin-top:4px}
+  .read-chip .fb{display:flex;gap:12px;justify-content:flex-end;margin-top:8px}
+  .read-chip .fb span{font-family:var(--sora);font-size:11px;color:var(--dim);font-weight:500}
+  .read-chip .fb b{color:var(--mist);font-weight:600}
+  .carry-chip{position:absolute;left:16px;bottom:14px;z-index:3;display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:12px;background:rgba(7,16,12,.55);border:1px solid var(--line2);backdrop-filter:blur(10px);font-family:var(--sora);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--teal);font-weight:600}
+  .carry-chip:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 7px var(--teal)}
+
+  /* score chip (top-right, glanceable; tap to expand card) */
+  .score-chip{font-family:var(--sora);font-weight:600;font-size:12px;letter-spacing:.03em;color:var(--mist);background:var(--panel);border:1px solid var(--line2);padding:8px 13px;border-radius:30px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:.15s}
+  .score-chip b{color:var(--lime);font-weight:700}
+  .score-chip:active{background:rgba(255,255,255,.1)}
+
+  /* tap-to-locate */
+  .taplayer{position:absolute;inset:0;z-index:2;cursor:crosshair}
+  .ballmark{position:absolute;z-index:3;transform:translate(-50%,-50%);pointer-events:none}
+  .ballmark .dot{display:block;width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#d7e6dc);border:1.5px solid #0a1813;box-shadow:0 2px 6px rgba(0,0,0,.6),0 0 12px rgba(182,255,77,.5)}
+  .ballmark .halo{position:absolute;left:50%;top:50%;width:30px;height:30px;transform:translate(-50%,-50%);border-radius:50%;border:1.5px solid var(--lime);opacity:.55}
+  .ballmark:after{content:"";position:absolute;left:50%;top:50%;width:46px;height:46px;transform:translate(-50%,-50%);border-radius:50%;border:1px solid rgba(182,255,77,.25)}
+  .ballmark.placed .halo{animation:ping .55s ease-out}
+  @keyframes ping{0%{transform:translate(-50%,-50%) scale(.35);opacity:.9}100%{transform:translate(-50%,-50%) scale(1);opacity:.55}}
+  .tap-hint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:4;font-family:var(--sora);font-size:10px;letter-spacing:.06em;color:var(--void);background:var(--lime);padding:7px 14px;border-radius:20px;box-shadow:0 6px 18px -6px rgba(182,255,77,.7);white-space:nowrap;transition:opacity .3s}
+  .tap-hint.hide{opacity:0;pointer-events:none}
+
+  /* scorecard sheet */
+  .card-sheet{position:absolute;inset:0;z-index:30;background:rgba(6,16,13,.75);backdrop-filter:blur(8px);display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .3s}
+  .card-sheet.show{opacity:1;pointer-events:auto}
+  .card-inner{width:100%;background:linear-gradient(180deg,#0c1c16,#081511);border-top:1px solid var(--line);border-radius:24px 24px 0 0;padding:20px 20px 26px;transform:translateY(20px);transition:transform .3s}
+  .card-sheet.show .card-inner{transform:none}
+  .card-inner h4{font-family:var(--sora);font-weight:700;font-size:15px;margin-bottom:2px}
+  .card-inner .csub{font-family:var(--sora);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:14px}
+  .cardrow{display:grid;grid-template-columns:repeat(9,1fr);gap:3px;font-family:var(--sora);font-size:10px;text-align:center}
+  .cardrow .lab{color:var(--dim);font-size:8px;letter-spacing:.05em}
+  .cardrow .val{color:var(--mist);padding:5px 0;font-weight:600}
+  .cardrow .val.b{color:var(--lime)} .cardrow .val.o{color:var(--gold)} .cardrow .cur{background:rgba(182,255,77,.14);border-radius:6px}
+  .cardtot{display:flex;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--line2);font-family:var(--sora)}
+  .cardtot div span{display:block;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+  .cardtot div b{font-size:20px;color:var(--mist)} .cardtot .sc b{color:var(--lime)}
+  .card-close{margin-top:16px;width:100%;height:46px;border:1px solid var(--line2);background:var(--panel);color:var(--mist);border-radius:13px;font-family:var(--sora);font-weight:600;font-size:12px;cursor:pointer}
+
+  .dock{padding:10px 16px 22px;display:flex;flex-direction:column;align-items:center;gap:12px;position:relative}
+  .dock .row{display:flex;gap:8px;width:100%}
+  .pill{flex:1;height:44px;border-radius:13px;border:1px solid var(--line2);background:var(--panel);color:var(--mist);font-family:var(--sora);font-weight:600;font-size:11px;cursor:pointer;-webkit-tap-highlight-color:transparent;display:flex;align-items:center;justify-content:center;gap:6px;backdrop-filter:blur(10px);transition:.15s}
+  .pill:active{background:rgba(255,255,255,.1)}
+  .dock .orb-stage{margin-top:2px}
+  .dock .orb{width:84px;height:84px;font-size:30px}
+  .dock .hint{font-family:var(--sora);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+  .talk-status{font-family:var(--serif);font-style:italic;font-size:13px;color:var(--lime);min-height:18px;text-align:center;transition:.2s;opacity:0}
+  .talk-status.show{opacity:1}
+  .orb.listening{animation:listen 1s ease-in-out infinite;box-shadow:0 0 0 3px rgba(182,255,77,.35),0 0 40px -4px rgba(182,255,77,.6)!important}
+  @keyframes listen{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+  .ghost-next{position:absolute;right:16px;bottom:24px;background:none;border:none;color:var(--dim);font-family:var(--sora);font-weight:600;font-size:11px;cursor:pointer;-webkit-tap-highlight-color:transparent;opacity:.7}
+  .ghost-next:active{opacity:1}
+
+  /* ---- caddy overlay ---- */
+  .caddy{position:absolute;inset:0;z-index:30;background:radial-gradient(80% 50% at 50% 12%, rgba(182,255,77,.12), transparent 55%),linear-gradient(170deg,#0b1a15,#070f0c);display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .35s ease}
+  .caddy.show{opacity:1;pointer-events:auto}
+  .caddy-top{display:flex;flex-direction:column;align-items:center;padding:42px 0 6px}
+  .caddy-top .orb-stage .orb{width:84px;height:84px;font-size:30px}
+  .caddy-top .who{font-family:var(--sora);font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--dim);margin-top:16px}
+  .caddy-top .who b{color:var(--mist)}
+  .caddy-inner{flex:1;display:flex;flex-direction:column;justify-content:center;padding:6px 30px}
+  .caddy .tagline{font-family:var(--sora);font-weight:600;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--lime);margin-bottom:14px}
+  .caddy .line{font-family:var(--serif);font-style:italic;font-weight:400;font-size:25px;line-height:1.4;color:var(--mist)}
+  .caddy .line .em{color:var(--lime);font-style:normal;font-family:var(--sora);font-weight:600}
+  .caddy .cue{margin-top:22px;padding-top:20px;border-top:1px solid var(--line2);font-family:var(--serif);font-style:italic;font-size:18px;line-height:1.4;color:var(--dim)}
+  .caddy-foot{padding:14px 24px 26px;display:flex;gap:10px}
+
+  /* ---- trouble ---- */
+  .trouble{flex:1;display:flex;flex-direction:column;padding:14px 18px 0;min-height:0}
+  .bubbles{flex:1;display:flex;flex-direction:column;gap:11px;overflow-y:auto;padding-bottom:12px}
+  .b{max-width:86%;padding:12px 15px;border-radius:18px;font-size:14px;line-height:1.45}
+  .b.me{align-self:flex-end;background:var(--lime);color:#0a1a10;border-bottom-right-radius:5px;font-weight:600}
+  .b.caddy-b{align-self:flex-start;background:var(--panel);border:1px solid var(--line2);border-bottom-left-radius:5px;font-family:var(--serif);font-style:italic;font-size:15px;color:var(--mist);backdrop-filter:blur(8px)}
+  .b.caddy-b.ask{font-style:normal;font-family:var(--sora);font-weight:500;font-size:13.5px;color:var(--lime-soft)}
+  .opts{display:flex;gap:8px;align-self:flex-start;flex-wrap:wrap}
+  .opt{padding:11px 17px;border-radius:13px;border:1px solid var(--lime);background:rgba(182,255,77,.12);color:var(--lime);font-family:var(--sora);font-weight:700;font-size:13px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .opt:active{background:var(--lime);color:#0a1a10}
+  .options-card{align-self:flex-start;max-width:92%;border-radius:16px;padding:14px 15px;background:var(--panel);border:1px solid var(--line2);backdrop-filter:blur(10px)}
+  .options-card h4{font-family:var(--sora);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-bottom:10px}
+  .orow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--line2);font-family:var(--body)}
+  .orow:first-of-type{border-top:none}
+  .orow .name{font-size:13px;font-weight:600;color:var(--mist)}
+  .orow .pen{font-family:var(--sora);font-size:10.5px;color:var(--gold);font-weight:700}
+  .orow .pen.free{color:var(--lime)}
+  .dock.sm{padding-top:6px}
+
+  /* ---- briefing ---- */
+  .briefing{flex:1;display:flex;flex-direction:column;padding:16px 20px 0;min-height:0}
+  .flyover{height:150px;border-radius:20px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:16px;border:1px solid var(--line);background:radial-gradient(120% 90% at 30% 0%, rgba(84,214,192,.22), transparent 60%),linear-gradient(150deg,#11473A,#0a201a)}
+  .flyover .ph{position:absolute;bottom:12px;left:14px;font-family:var(--sora);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+  .flyover .play{width:50px;height:50px;border-radius:50%;background:var(--lime);display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px -4px rgba(182,255,77,.7);cursor:pointer}
+  .flyover .play:after{content:"";border-left:15px solid #0a1a10;border-top:9px solid transparent;border-bottom:9px solid transparent;margin-left:4px}
+  .brief-h{font-family:var(--sora);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--lime);margin-bottom:10px}
+  .brief-line{font-family:var(--serif);font-style:italic;font-size:21px;line-height:1.4;color:var(--mist);margin-bottom:14px}
+  .insight{border-radius:16px;padding:15px;background:rgba(182,255,77,.07);border:1px solid var(--line)}
+  .insight .tag{font-family:var(--sora);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--lime);margin-bottom:7px}
+  .insight p{font-family:var(--serif);font-style:italic;font-size:15px;line-height:1.45;color:var(--mist)}
+
+  /* ---- review ---- */
+  .review{flex:1;padding:18px 22px 0;display:flex;flex-direction:column;gap:13px;overflow-y:auto}
+  .review-h{font-family:var(--sora);font-weight:800;font-size:24px;letter-spacing:-.02em}
+  .review-h em{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--lime)}
+  .stat-row{display:flex;gap:10px}
+  .stat{flex:1;border-radius:16px;padding:13px;background:var(--panel);border:1px solid var(--line2);backdrop-filter:blur(10px)}
+  .stat .v{font-family:var(--sora);font-weight:700;font-size:28px;letter-spacing:-.02em}
+  .stat .v.good{color:var(--lime)}.stat .v.warn{color:var(--gold)}
+  .stat .k{font-family:var(--sora);font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-top:4px}
+
+  .legend{max-width:520px;text-align:center;color:var(--dim);font-size:12px;line-height:1.6}
+  .legend b{color:var(--mist)}
+  @media(max-width:420px){.phone{width:316px;height:660px}.read-chip .big{font-size:46px}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+  <div class="intro">
+    <div class="eyebrow">LouisGolf · Prototype</div>
+    <h1>A caddy you can <em>hear</em>.</h1>
+    <p>Turn sound on. On the hole, <b>tap the map</b> to place your ball (the yardage updates), then <b>hold the orb and talk to Louis</b> — it's the only button you need. Ask for the play, tell him "I'm in the water," or say "next hole," and he responds. Tap the score in the corner to see the card. (Voice works in Chrome/Safari; a tap still gives the read.)</p>
+    <div class="ctrl-row">
+      <div class="sound-toggle" id="soundToggle"><span class="ico">🔊</span><span id="soundLabel">Sound on</span></div>
+      <select class="voice-pick" id="voicePick" aria-label="Choose voice"><option>Loading voices…</option></select>
+    </div>
+    <p class="voice-note" id="voiceNote">Pick the smoothest voice your device offers. On iPhone, the "Siri" or "Enhanced/Premium" voices sound best (Settings → Accessibility → Spoken Content → Voices to add them).</p>
+  </div>
+
+  <div class="jumper" id="jumper">
+    <button data-go="start" class="active">Start</button>
+    <button data-go="hole">Hole 7</button>
+    <button data-go="trouble">In the water</button>
+    <button data-go="briefing">Briefing</button>
+    <button data-go="review">Review</button>
+  </div>
+
+  <div class="phone">
+    <div class="screen">
+      <div class="notch"></div>
+      <div class="statusbar">
+        <span class="brand">
+          <svg width="13" height="13" viewBox="0 0 100 100" fill="none"><path d="M26 78 Q50 70 78 78" stroke="#B6FF4D" stroke-width="11" stroke-linecap="round"/><line x1="34" y1="78" x2="34" y2="22" stroke="#B6FF4D" stroke-width="11" stroke-linecap="round"/><path d="M38 21 L68 30 L38 40 Z" fill="#F2B441"/></svg>
+          9:41
+        </span>
+        <span class="chip-on">offline ready</span>
+      </div>
+
+      <!-- START -->
+      <div class="scene active" id="start">
+        <div class="start">
+          <div class="orb-stage"><div class="rings"></div><div class="orb" id="orbStart">L</div></div>
+          <h2>LouisGolf</h2>
+          <div class="sub">Your personal golf caddy</div>
+          <div class="glass course-card">
+            <div class="cn">Pine Valley National</div>
+            <div class="cd">Blue tees · 6,840 yds · Par 72</div>
+            <div class="ready">Downloaded — ready offline</div>
+          </div>
+          <button class="btn lime" id="startBtn">Start round with Louis</button>
+        </div>
+      </div>
+
+      <!-- HOLE -->
+      <div class="scene" id="hole">
+        <div class="holebar"><div class="hole">Hole 7 · <b>Par 4</b></div><button class="score-chip" id="scoreChip">H7 · <b>+2</b></button></div>
+        <div class="mapwrap">
+          <svg viewBox="0 0 280 440" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="grn" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#1d6b4f"/><stop offset="100%" stop-color="#0c2c22"/></radialGradient>
+            </defs>
+            <rect width="280" height="440" fill="#0a1813"/>
+            <path d="M150 396 C144 338 110 304 120 250 C128 204 150 172 152 124" fill="none" stroke="#16463399" stroke-width="52" stroke-linecap="round"/>
+            <path d="M150 396 C144 338 110 304 120 250 C128 204 150 172 152 124" fill="none" stroke="#1f6b4d55" stroke-width="50" stroke-linecap="round"/>
+            <rect x="140" y="402" width="20" height="11" rx="3" fill="#2a6f52"/>
+            <ellipse cx="90" cy="270" rx="18" ry="11" fill="#3a3320" stroke="#6b5e34" stroke-width="1"/>
+            <path d="M178 152 q28 -7 42 11 q8 21 -9 33 q-31 8 -46 -9 q-6 -19 13 -36Z" fill="#16494e" stroke="#54D6C0" stroke-width="1.4" opacity=".85"/>
+            <text x="190" y="182" font-family="Sora" font-size="9" fill="#54D6C0" letter-spacing="1">WATER</text>
+            <ellipse cx="150" cy="100" rx="36" ry="29" fill="url(#grn)" stroke="#B6FF4D" stroke-width="1.5"/>
+            <line x1="150" y1="100" x2="150" y2="62" stroke="#cfe8d8" stroke-width="2"/>
+            <path d="M150 62 l15 6 l-15 6 Z" fill="#FF5A47"/>
+            <circle cx="150" cy="100" r="3.4" fill="#0a1813"/>
+            <line x1="148" y1="372" x2="150" y2="108" stroke="#B6FF4D" stroke-width="1.3" stroke-dasharray="3 6" opacity=".8"/>
+            <path d="M86 312 Q148 288 210 312" fill="none" stroke="#B6FF4D" stroke-width="1" stroke-dasharray="2 5" opacity=".5"/>
+            <text x="214" y="312" font-family="Sora" font-size="11" fill="#B6FF4D" font-weight="600" opacity=".75">150</text>
+          </svg>
+          <!-- tap-to-locate layer: tap anywhere on the map to place the ball -->
+          <div class="taplayer" id="tapLayer"></div>
+          <div class="ballmark" id="ballMark" style="left:52.9%;top:84.5%"><span class="dot"></span><span class="halo"></span></div>
+          <div class="tap-hint" id="tapHint">Tap the map to place your ball</div>
+          <!-- single clean read chip: the one number that matters -->
+          <div class="read-chip"><div class="big" id="readBig">147</div><div class="unit">to center</div><div class="fb"><span>F <b>132</b></span><span>B <b>156</b></span></div></div>
+          <div class="carry-chip">water · 118 carry</div>
+        </div>
+        <div class="dock">
+          <div class="orb-stage"><div class="rings"></div><div class="orb" id="orbHole">L</div></div>
+          <div class="hint" id="talkHint">Tap the orb for the play · hold to talk</div>
+          <div class="talk-status" id="talkStatus"></div>
+        </div>
+
+        <!-- caddy overlay -->
+        <div class="caddy" id="caddyOverlay">
+          <div class="caddy-top">
+            <div class="orb-stage"><div class="rings"></div><div class="orb" id="orbTalk"><div class="wave" id="wave1"><span></span><span></span><span></span><span></span><span></span></div></div></div>
+            <div class="who">Your caddy · <b>LOUIS</b></div>
+          </div>
+          <div class="caddy-inner">
+            <div class="tagline">The play</div>
+            <div class="line">Smooth <span class="em">8-iron</span>, center of the green. The water's only in play if you bail right — so we aim a touch left and take the big number out of it.</div>
+            <div class="cue">Pick your target. Commit to it. One look, then go.</div>
+          </div>
+          <div class="caddy-foot">
+            <button class="btn glassbtn" id="caddyReplay">↻ Replay</button>
+            <button class="btn lime" id="caddyGot" style="height:50px;font-size:12px">Got it</button>
+          </div>
+        </div>
+
+        <!-- scorecard sheet (tap the score chip) -->
+        <div class="card-sheet" id="cardSheet">
+          <div class="card-inner">
+            <h4>Scorecard</h4>
+            <div class="csub">Front nine · auto-tracked</div>
+            <div class="cardrow">
+              <span class="lab">1</span><span class="lab">2</span><span class="lab">3</span><span class="lab">4</span><span class="lab">5</span><span class="lab">6</span><span class="lab">7</span><span class="lab">8</span><span class="lab">9</span>
+              <span class="val">4</span><span class="val b">3</span><span class="val">5</span><span class="val o">6</span><span class="val">4</span><span class="val">4</span><span class="val cur">–</span><span class="val">4</span><span class="val">5</span>
+            </div>
+            <div class="cardtot">
+              <div><span>Thru</span><b>6</b></div>
+              <div><span>Strokes</span><b>26</b></div>
+              <div class="sc"><span>Score</span><b>+2</b></div>
+            </div>
+            <button class="card-close" id="cardClose">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TROUBLE -->
+      <div class="scene" id="trouble">
+        <div class="holebar"><div class="hole">Hole 7 · <b>Penalty area</b></div><div class="pace">on pace</div></div>
+        <div class="trouble"><div class="bubbles" id="bubbles"></div></div>
+        <div class="dock sm"><div class="orb-stage"><div class="rings"></div><div class="orb" id="orbTrouble" style="width:64px;height:64px;font-size:24px">L</div></div><div class="hint">Press to answer</div></div>
+      </div>
+
+      <!-- BRIEFING -->
+      <div class="scene" id="briefing">
+        <div class="holebar"><div class="hole">Next · <b>Hole 8 · Par 5</b></div><div class="pace">on pace</div></div>
+        <div class="briefing">
+          <div class="flyover"><div class="play" id="flyPlay"></div><div class="ph">Flyover · tap to play</div></div>
+          <div class="brief-h">Louis's plan</div>
+          <div class="brief-line">Three-shot hole. Smooth tee ball to the wide side, then lay up to a full wedge — we don't force the second.</div>
+          <div class="insight"><div class="tag">Your pattern · last 8 rounds</div><p>8 rewards patience — your birdies here come from a wedge in your hand, not from going for it. Easy 5, look for 4.</p></div>
+          <button class="btn lime" id="briefSpeak" style="margin-top:16px;height:50px;font-size:12px">▸ Hear the briefing</button>
+        </div>
+      </div>
+
+      <!-- REVIEW -->
+      <div class="scene" id="review">
+        <div class="holebar"><div class="hole">Round review</div><div class="pace" style="color:var(--mist)">81</div></div>
+        <div class="review">
+          <div class="review-h">So close to <em>79</em>.</div>
+          <div class="stat-row"><div class="stat"><div class="v good">11</div><div class="k">fairways</div></div><div class="stat"><div class="v good">12</div><div class="k">greens · GIR</div></div></div>
+          <div class="stat-row"><div class="stat"><div class="v warn">3</div><div class="k">3-putts</div></div><div class="stat"><div class="v good">0</div><div class="k">doubles+</div></div></div>
+          <div class="insight"><div class="tag">Process · committed</div><p>You stuck to the plan on 11 and 17 — that discipline is how the doubles disappeared. The strokes left are on the greens.</p></div>
+          <button class="btn lime" id="reviewSpeak" style="height:50px;font-size:12px">▸ Hear Louis's recap</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="legend"><b>Tip:</b> voice uses your browser's built-in speech, so the exact sound varies by device — in the real app, Louis is a recorded, characterful voice. No sound? Check the toggle and your volume.</div>
+
+<script>
+  let soundOn=true,louisVoice=null,userPicked=false;
+  // score voices: higher = smoother/more natural
+  function scoreVoice(v){
+    const n=(v.name||'').toLowerCase();let s=0;
+    if(!v.lang||!v.lang.toLowerCase().startsWith('en'))s-=100;
+    if(/natural|neural|premium|enhanced|online/.test(n))s+=50;
+    if(/siri/.test(n))s+=45;
+    if(/google/.test(n))s+=35;            // Google voices are smooth (network)
+    if(/microsoft/.test(n)&&/online|natural/.test(n))s+=40;
+    if(/samantha|daniel|aaron|arthur|serena|allison|ava|tom|alex/.test(n))s+=20;
+    if(/compact|eloquence|fred|albert|zarvox|espeak|robot/.test(n))s-=40; // robotic
+    if(/en-us|en-gb/.test((v.lang||'').toLowerCase()))s+=8;
+    return s;
+  }
+  function englishVoices(){return speechSynthesis.getVoices().filter(v=>v.lang&&v.lang.toLowerCase().startsWith('en')).sort((a,b)=>scoreVoice(b)-scoreVoice(a));}
+  function pickVoice(){const e=englishVoices();return e[0]||speechSynthesis.getVoices()[0]||null;}
+
+  const picker=document.getElementById('voicePick');
+  function populatePicker(){
+    if(!('speechSynthesis'in window))return;
+    const list=englishVoices();if(!list.length)return;
+    picker.innerHTML='';
+    list.forEach((v,i)=>{const o=document.createElement('option');o.value=v.name;
+      o.textContent=(i===0?'★ ':'')+v.name.replace(/\(.*?\)/,'').trim()+(/google|natural|neural|premium|enhanced|siri/i.test(v.name)?' · smooth':'');
+      picker.appendChild(o);});
+    if(!userPicked){louisVoice=list[0];picker.value=list[0].name;}
+  }
+  if('speechSynthesis'in window){
+    speechSynthesis.onvoiceschanged=()=>{if(!userPicked)louisVoice=pickVoice();populatePicker();};
+    setTimeout(()=>{if(!louisVoice)louisVoice=pickVoice();populatePicker();},350);
+  }
+  picker.addEventListener('change',()=>{
+    userPicked=true;const v=speechSynthesis.getVoices().find(x=>x.name===picker.value);if(v){louisVoice=v;
+      speak("Hi — I'm Louis. This is how I'll sound on your bag.",null,null);}
+  });
+
+  let curOrb=null,curWave=null;
+  function speak(text,orb,wave){
+    if(!('speechSynthesis'in window))return;speechSynthesis.cancel();stopAnim();if(!soundOn)return;
+    const u=new SpeechSynthesisUtterance(text);if(!louisVoice)louisVoice=pickVoice();if(louisVoice)u.voice=louisVoice;
+    u.rate=.92;u.pitch=.98;u.volume=1;            // calmer, natural pitch (low pitch muddies most voices)
+    curOrb=orb;curWave=wave;
+    u.onstart=()=>{if(orb)orb.classList.add('talking');if(wave)wave.classList.add('on');};
+    u.onend=()=>stopAnim();speechSynthesis.speak(u);
+  }
+  function stopAnim(){if(curOrb)curOrb.classList.remove('talking');if(curWave)curWave.classList.remove('on');}
+
+  const st=document.getElementById('soundToggle');
+  st.addEventListener('click',()=>{soundOn=!soundOn;st.classList.toggle('off',!soundOn);st.querySelector('.ico').textContent=soundOn?'🔊':'🔇';document.getElementById('soundLabel').textContent=soundOn?'Sound on':'Sound off';if(!soundOn)speechSynthesis.cancel();});
+
+  const scenes={};['start','hole','trouble','briefing','review'].forEach(id=>scenes[id]=document.getElementById(id));
+  const jumper=document.getElementById('jumper');
+  function go(id){Object.values(scenes).forEach(s=>s.classList.remove('active'));scenes[id].classList.add('active');[...jumper.children].forEach(b=>b.classList.toggle('active',b.dataset.go===id));if('speechSynthesis'in window)speechSynthesis.cancel();stopAnim();document.getElementById('caddyOverlay').classList.remove('show');if(id==='trouble')resetTrouble();}
+  jumper.addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(b.dataset.go);});
+
+  document.getElementById('orbStart').addEventListener('click',()=>{go('hole');});
+  document.getElementById('startBtn').addEventListener('click',()=>{go('hole');speak("Good to have you out here. Hole seven — let's settle in. Press the orb any time and I'll give you the play.",document.getElementById('orbHole'),null);});
+
+  const overlay=document.getElementById('caddyOverlay'),orbTalk=document.getElementById('orbTalk'),wave1=document.getElementById('wave1');
+  const callLine="Smooth 8-iron, center of the green. The water's only in play if you bail right, so we aim a touch left and take the big number out of it. Pick your target. Commit to it. One look, then go.";
+  function openCall(){overlay.classList.add('show');speak(callLine,orbTalk,wave1);}
+
+  /* --- Voice-first: hold the orb and talk to Louis. Say a trouble word → trouble convo; else → the read. --- */
+  const orbHole=document.getElementById('orbHole'), talkHint=document.getElementById('talkHint'),
+        talkStatus=document.getElementById('talkStatus');
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const troubleWords=/(water|hazard|penalty|trouble|in the drink|wet|bunker|sand|tree|rough|lost|out of bounds|o\.?b\.?)/i;
+  const nextWords=/(next hole|next up|move on|briefing|hole eight|hole 8|what.s next)/i;
+  let rec=null, listening=false, heard='';
+
+  function setStatus(t,show=true){talkStatus.textContent=t;talkStatus.classList.toggle('show',show);}
+  function route(text){
+    heard='';
+    if(nextWords.test(text)){ go('briefing'); }        // "next hole" → Louis moves you on
+    else if(troubleWords.test(text)){ go('trouble'); }  // trouble → Louis takes over
+    else { openCall(); }                                // normal read
+  }
+  function startListen(){
+    if(listening)return;
+    if(!SR){ // no speech support → graceful: show hint, tap gives the read
+      setStatus('(voice needs Chrome/Safari — tap for the read)');
+      setTimeout(()=>setStatus('',false),2200); return;
+    }
+    listening=true; orbHole.classList.add('listening'); talkHint.style.visibility='hidden';
+    setStatus('Listening… tell Louis'); heard='';
+    try{
+      rec=new SR(); rec.lang='en-US'; rec.interimResults=true; rec.maxAlternatives=1;
+      rec.onresult=e=>{heard=Array.from(e.results).map(r=>r[0].transcript).join(' ');setStatus('“'+heard.trim()+'”');};
+      rec.onerror=()=>{};
+      rec.onend=()=>{stopListen();if(heard.trim())route(heard);else{setStatus('Didn\'t catch that — here\'s the play');setTimeout(()=>setStatus('',false),1400);openCall();}};
+      rec.start();
+    }catch(err){listening=false;orbHole.classList.remove('listening');openCall();}
+  }
+  function stopListen(){listening=false;orbHole.classList.remove('listening');talkHint.style.visibility='';setTimeout(()=>{if(!listening)talkStatus.classList.remove('show');},1500);if(rec){try{rec.stop();}catch(e){}}}
+
+  // Tap the orb = get the read (always works). Hold the orb = talk to Louis (where speech is supported).
+  let held=false, holdTimer=null, didListen=false;
+  function pressStart(e){
+    held=true; didListen=false;
+    if(SR){ holdTimer=setTimeout(()=>{ if(held){ didListen=true; startListen(); } },320); }
+  }
+  function pressEnd(e){
+    if(!held && !listening) return;
+    held=false; clearTimeout(holdTimer);
+    if(listening){ rec&&rec.stop(); }        // release ends listening → routes
+    else if(!didListen){ openCall(); }        // quick tap → give the read
+  }
+  orbHole.addEventListener('mousedown',pressStart);
+  orbHole.addEventListener('mouseup',pressEnd);
+  orbHole.addEventListener('mouseleave',()=>{if(held)pressEnd();});
+  orbHole.addEventListener('touchstart',e=>{e.preventDefault();pressStart(e);},{passive:false});
+  orbHole.addEventListener('touchend',e=>{e.preventDefault();pressEnd(e);},{passive:false});
+
+  document.getElementById('caddyReplay').addEventListener('click',()=>speak(callLine,orbTalk,wave1));
+  document.getElementById('caddyGot').addEventListener('click',()=>{overlay.classList.remove('show');if('speechSynthesis'in window)speechSynthesis.cancel();stopAnim();});
+
+  /* --- Tap-to-locate: tap the map to place the ball; updates yardage & primes the read --- */
+  const tapLayer=document.getElementById('tapLayer'), ballMark=document.getElementById('ballMark'),
+        tapHint=document.getElementById('tapHint'), readBig=document.getElementById('readBig');
+  let ballPlaced=false;
+  // green center sits at ~53.6% x, 22.7% y of the map; convert taps to a rough "yards to center"
+  function yardsToCenter(xPct,yPct){
+    const gx=53.6, gy=22.7;                         // green center in %
+    const dx=(xPct-gx), dy=(yPct-gy);
+    const dist=Math.sqrt(dx*dx+dy*dy);              // % distance
+    return Math.max(6, Math.round(dist*4.6));       // scale % → yards (tuned so tee≈300, mid≈150)
+  }
+  tapLayer.addEventListener('click',e=>{
+    const r=tapLayer.getBoundingClientRect();
+    const xPct=((e.clientX-r.left)/r.width)*100, yPct=((e.clientY-r.top)/r.height)*100;
+    ballMark.style.left=xPct+'%'; ballMark.style.top=yPct+'%';
+    ballMark.classList.remove('placed'); void ballMark.offsetWidth; ballMark.classList.add('placed');
+    readBig.textContent=yardsToCenter(xPct,yPct);
+    if(!ballPlaced){ballPlaced=true; tapHint.textContent='Ball set · press the orb for the read'; setTimeout(()=>tapHint.classList.add('hide'),1600);}
+  });
+
+  /* --- Scorecard: tap the score chip to expand the card --- */
+  const cardSheet=document.getElementById('cardSheet');
+  document.getElementById('scoreChip').addEventListener('click',()=>cardSheet.classList.add('show'));
+  document.getElementById('cardClose').addEventListener('click',()=>cardSheet.classList.remove('show'));
+  cardSheet.addEventListener('click',e=>{if(e.target===cardSheet)cardSheet.classList.remove('show');});
+
+  const bubbles=document.getElementById('bubbles');
+  function addB(html,cls){const d=document.createElement('div');d.className='b '+cls;d.innerHTML=html;bubbles.appendChild(d);bubbles.scrollTop=bubbles.scrollHeight;return d;}
+  function addNode(n){bubbles.appendChild(n);bubbles.scrollTop=bubbles.scrollHeight;}
+  let troubleDone=false;
+  function resetTrouble(){troubleDone=false;bubbles.innerHTML='';addB("I just hit it in the water.","me");
+    setTimeout(()=>{addB("Okay — happens to everyone. Take a breath, we'll get you sorted.","caddy-b");speak("Okay — happens to everyone. Take a breath, we'll get you sorted.",document.getElementById('orbTrouble'),null);
+      setTimeout(()=>{addB("Were the stakes red or yellow?","caddy-b ask");speak("Were the stakes red, or yellow?",document.getElementById('orbTrouble'),null);
+        const o=document.createElement('div');o.className='opts';o.innerHTML='<button class="opt" data-s="red">Red</button><button class="opt" data-s="yellow">Yellow</button>';o.addEventListener('click',handleStake);addNode(o);},1700);},650);}
+  function handleStake(e){const b=e.target.closest('.opt');if(!b||troubleDone)return;troubleDone=true;const red=b.dataset.s==='red';addB(red?'Red':'Yellow','me');b.parentElement.remove();
+    setTimeout(()=>{const t1=red?"Red stakes — so you've also got lateral relief, which is usually your friend here.":"Yellow — so you've got two relief options, both one shot.";addB(t1,'caddy-b');
+      setTimeout(()=>{const card=document.createElement('div');card.className='options-card';card.innerHTML='<h4>Your options · 1 stroke each</h4><div class="orow"><span class="name">Play it as it lies</span><span class="pen free">no penalty</span></div><div class="orow"><span class="name">Stroke &amp; distance</span><span class="pen">+1</span></div><div class="orow"><span class="name">Back-on-the-line</span><span class="pen">+1</span></div>'+(red?'<div class="orow"><span class="name">Lateral · 2 club-lengths</span><span class="pen">+1</span></div>':'');addNode(card);
+        setTimeout(()=>{const t2="Take the "+(red?'lateral':'back-on-the-line')+" drop — it leaves you a full 90 to the middle. Then it's just a reset shot. Middle of the green, smooth tempo. Bogey's a fine score from here.";addB(t2,'caddy-b');speak(t1+" "+t2,document.getElementById('orbTrouble'),null);},650);},650);},450);}
+  document.getElementById('orbTrouble').addEventListener('click',()=>{if(!troubleDone){const o=bubbles.querySelector('.opts .opt[data-s="red"]');if(o)o.click();}});
+
+  const briefText="Next up, hole eight — three-shot hole. Smooth tee ball to the wide side, then lay up to a full wedge. We don't force the second. And listen — eight rewards patience. Your birdies here come from a wedge in your hand, not from going for it. Easy five, look for four.";
+  document.getElementById('briefSpeak').addEventListener('click',()=>speak(briefText,null,null));
+  document.getElementById('flyPlay').addEventListener('click',()=>speak(briefText,null,null));
+  document.getElementById('reviewSpeak').addEventListener('click',()=>speak("Eighty-one — so close to seventy-nine, and no doubles all day. You stuck to the plan on eleven and seventeen, and that's exactly how the big numbers disappeared. The strokes left are on the greens. Three three-putts. That's where we go to work. Good round, Louis.",null,null));
+
+  document.body.addEventListener('click',()=>{if('speechSynthesis'in window&&!louisVoice)louisVoice=pickVoice();},{once:true});
+</script>
+</body>
+</html>
